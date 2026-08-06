@@ -1,47 +1,23 @@
-import React, { useRef } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import React from 'react';
 import { Download } from 'lucide-react';
 
 export default function App() {
-  const formRef = useRef<HTMLDivElement>(null);
-
-  const handleDownloadPdf = async () => {
-    if (!formRef.current) return;
-    
-    try {
-      const canvas = await html2canvas(formRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('BU_Transport_Requisition_Form.pdf');
-    } catch (error) {
-      console.error("Error generating PDF", error);
-    }
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-4 sm:p-10 font-sans text-[#111827] overflow-y-auto">
-      <div className="w-full max-w-[920px] flex justify-end mb-4">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-4 sm:p-10 font-sans text-[#111827] overflow-y-auto print:bg-white print:p-0">
+      <div className="w-full max-w-[920px] flex justify-end mb-4 print:hidden">
         <button 
-          onClick={handleDownloadPdf}
+          onClick={handlePrint}
           className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-xs font-bold rounded shadow-lg shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-colors"
         >
           <Download size={16} />
           Download & Print
         </button>
       </div>
-      <div ref={formRef} className="bg-white shadow-2xl rounded-xl border border-gray-200 max-w-[920px] w-full p-8 sm:p-10 flex flex-col gap-6 relative">
+      <div className="bg-white shadow-2xl rounded-xl border border-gray-200 max-w-[920px] w-full p-8 sm:p-10 flex flex-col gap-6 relative print:shadow-none print:border-none print:p-0">
         
         {/* Header */}
         <div className="flex flex-col text-center border-b border-gray-200 pb-6 mb-2">
@@ -165,10 +141,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Page number */}
-        <div className="text-center mt-16 text-[10px] text-gray-400 font-bold">
-          11
-        </div>
+
       </div>
     </div>
   );
