@@ -8,62 +8,16 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showIframeNotice, setShowIframeNotice] = useState(false);
 
-  const handlePrint = async () => {
-    if (!formRef.current || isDownloading) return;
-    
-    setIsDownloading(true);
-    setShowIframeNotice(false);
-    
-    try {
-      const canvas = await html2canvas(formRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate dimensions to fit on A4
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: 'a4'
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const imgProps = pdf.getImageProperties(imgData);
-      const imgRatio = imgProps.width / imgProps.height;
-      
-      let finalWidth = pdfWidth;
-      
-      // Add margin of 20px
-      const margin = 20;
-      finalWidth = pdfWidth - (margin * 2);
-      let finalHeight = finalWidth / imgRatio;
-      
-      if (finalHeight > pdfHeight - (margin * 2)) {
-         finalHeight = pdfHeight - (margin * 2);
-         finalWidth = finalHeight * imgRatio;
-      }
-      
-      pdf.addImage(imgData, 'PNG', margin, margin, finalWidth, finalHeight);
-      pdf.save('BU_Transport_Requisition_Form.pdf');
-      
-      // If we are inside an iframe (like the AI Studio preview window), 
-      // downloads might be silently blocked by the browser's security sandbox.
-      if (window.self !== window.top) {
-        setShowIframeNotice(true);
-        setTimeout(() => setShowIframeNotice(false), 10000);
-      }
-    } catch (error) {
-      console.error("Error generating PDF", error);
-      alert("An error occurred while generating the PDF. Please try again.");
-    } finally {
-      setIsDownloading(false);
+  const handlePrint = () => {
+    // If we are inside an iframe (like the AI Studio preview window), 
+    // downloads and printing might be silently blocked by the browser's security sandbox.
+    if (window.self !== window.top) {
+      alert("⚠️ PREVIEW RESTRICTION ⚠️\n\nTo download or print this form as a PDF, you must open it in a full browser tab.\n\nPlease click the 'Open in new tab' icon (↗) at the top right of this preview window, then click the Download button again.");
+      return;
     }
+
+    // Use native browser print which allows "Save as PDF" in high quality
+    window.print();
   };
 
   return (
@@ -71,22 +25,11 @@ export default function App() {
       <div className="w-full max-w-[850px] flex flex-col items-end gap-3 mb-4 print:hidden">
         <button 
           onClick={handlePrint}
-          disabled={isDownloading}
-          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-xs font-bold rounded shadow-lg shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-xs font-bold rounded shadow-lg shadow-blue-200 uppercase tracking-widest hover:bg-blue-700 transition-colors"
         >
-          {isDownloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-          {isDownloading ? 'Generating PDF...' : 'Download PDF'}
+          <Download size={16} />
+          Download / Print PDF
         </button>
-        
-        {showIframeNotice && (
-          <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-md max-w-sm shadow-sm animate-in fade-in slide-in-from-top-2">
-            <Info size={16} className="mt-0.5 flex-shrink-0 text-amber-600" />
-            <p>
-              If the download didn't start, your browser might be blocking downloads inside this preview. 
-              <strong> Please click the "Open in new tab" icon (↗) at the top right of the screen</strong> and try downloading from there.
-            </p>
-          </div>
-        )}
       </div>
       <div ref={formRef} className="bg-white shadow-2xl rounded-xl border border-gray-200 max-w-[850px] w-full p-6 sm:p-8 sm:px-12 flex flex-col gap-3 relative print:shadow-none print:border-none print:p-0 print:m-0 print:h-screen print:w-full">
         
