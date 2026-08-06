@@ -1,0 +1,6 @@
+{
+  "name": "BU Transport Requisition Form",
+  "description": "Digital version of the BU Transport Requisition Form (Within Station)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
